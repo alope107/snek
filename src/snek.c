@@ -26,15 +26,6 @@ const int directions[4][2] = {
     [LEFT]  = {0, -1}, 
 };
 
-#define COLOR_COUNT 4
-
-const color colors[COLOR_COUNT] = {
-    MAKE_COLOR(31, 0, 0),
-    MAKE_COLOR(31, 31, 0),
-    MAKE_COLOR(0, 31, 0),
-    MAKE_COLOR(0, 0, 0)
-};
-
 void fill() {
     unsigned int double_fill = fill_color | fill_color << 16;
     for(int r = 0; r < SCREEN_HEIGHT; r++) {
@@ -55,10 +46,9 @@ int main() {
     int row=50, col=50;
     direction dir = UP;
 
-    location history[MAX_SNEK_LEN] = {0};
+    location history[MAX_SNEK_LEN] = {};
     int hist_head = 0;
-
-    int hist_segments[COLOR_COUNT] = {0};
+    int hist_tail = 0;
 
     while(1) {
         vblank();
@@ -80,24 +70,19 @@ int main() {
         row = WRAP(row+directions[dir][0], SCREEN_HEIGHT);
         col = WRAP(col+directions[dir][1], SCREEN_WIDTH);
         
-        VRAM[row][col] = colors[0];
+        VRAM[row][col] = snek_color;
 
         history[hist_head] = make_loc(row, col);
         hist_head++;
-        for(int color_idx = 1; color_idx < COLOR_COUNT; color_idx++) {
-            int *hist_tail = hist_segments + color_idx;
-            int wrapped_tail = *hist_tail < hist_head ? *hist_tail : *hist_tail - MAX_SNEK_LEN;
-            if(hist_head - wrapped_tail == snek_len*color_idx) {
-                VRAM[row_val(history[*hist_tail])][col_val(history[*hist_tail])] = colors[color_idx];
-                (*hist_tail)++;
-                if (*hist_tail == MAX_SNEK_LEN) *hist_tail = 0;
-            }
+
+        int wrapped_tail = hist_tail < hist_head ? hist_tail : hist_tail - MAX_SNEK_LEN;
+        if(hist_head - wrapped_tail == snek_len) {
+            VRAM[row_val(history[hist_tail])][col_val(history[hist_tail])] = 0;
+            hist_tail++;
         }
 
-        
-
         if (hist_head == MAX_SNEK_LEN) hist_head = 0;
-        
+        if (hist_tail == MAX_SNEK_LEN) hist_tail = 0;
     };
     return 0;
 }
