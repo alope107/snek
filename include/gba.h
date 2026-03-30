@@ -7,6 +7,9 @@
 // Video RAM indexed as a 2d array of shorts (individual pixels in mode 3)
 #define VRAM ((volatile unsigned short (*)[SCREEN_WIDTH])0x06000000)
 
+// Video RAM indexed as unsigned ints. Useful for being able to overwrite 2 pixels at once
+#define VRAM_INT ((volatile unsigned int (*)[SCREEN_WIDTH/2])0x06000000)
+
 // Vertical scanline location
 #define REG_VCOUNT (*(volatile unsigned short*)0x04000006)
 

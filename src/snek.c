@@ -3,6 +3,7 @@
 #define MAX_SNEK_LEN 100
 
 const color snek_color = MAKE_COLOR(31, 0, 0);
+const color fill_color = MAKE_COLOR(0, 0, 31);
 
 typedef unsigned int location;
 
@@ -25,9 +26,20 @@ const int directions[4][2] = {
     [LEFT]  = {0, -1}, 
 };
 
+void fill() {
+    unsigned int double_fill = fill_color | fill_color << 16;
+    for(int r = 0; r < SCREEN_HEIGHT; r++) {
+        for(int c = 0; c < SCREEN_WIDTH/2; c++) {
+            VRAM_INT[r][c] = double_fill;
+        }
+    }
+}
+
 
 int main() {
     REG_DISPCNT = DCNT_BG2 | DCNT_MODE3;
+
+    fill();
 
     unsigned int snek_len = 10;
 
@@ -40,6 +52,11 @@ int main() {
 
     while(1) {
         vblank();
+
+        if(KEY_HELD(KEY_START)) {
+            fill();
+        }
+
         if(KEY_HELD(KEY_UP) && dir != DOWN) {
             dir = UP;
         } else if (KEY_HELD(KEY_RIGHT) && dir != LEFT) {
