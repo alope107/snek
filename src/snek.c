@@ -57,18 +57,18 @@ int main() {
 
     while(1) {
         vblank();
-        if(KEY_PRESSED(KEY_UP) && direction != 2) {
+        if(KEY_HELD(KEY_UP) && direction != 2) {
             direction = 0;
-        } else if (KEY_PRESSED(KEY_RIGHT) && direction != 3) {
+        } else if (KEY_HELD(KEY_RIGHT) && direction != 3) {
             direction = 1;
-        } else if (KEY_PRESSED(KEY_DOWN) && direction != 0) {
+        } else if (KEY_HELD(KEY_DOWN) && direction != 0) {
             direction = 2;
-        } else if (KEY_PRESSED(KEY_LEFT) && direction != 1) {
+        } else if (KEY_HELD(KEY_LEFT) && direction != 1) {
             direction = 3;
         }
 
         
-        if(KEY_PRESSED(KEY_B)) {
+        if(KEY_HELD(KEY_B)) {
             place_food(&seed);
         }
 
