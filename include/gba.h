@@ -54,10 +54,9 @@ typedef unsigned short color;
 
 #define PALETTE ((volatile color*) 0x05000000)
 
-// TODO(make inline again?)
- color make_color(unsigned int r, unsigned int g, unsigned int b) { 
-    return r | (g << 5) | (b << 10);
-}
+
+#define MAKE_COLOR(r, g, b) ( r | (g << 5) | (b << 10))
+
 
 inline void vblank() {
     while(REG_VCOUNT >= 160);
