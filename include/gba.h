@@ -1,12 +1,12 @@
 #ifndef GBA_H
 #define GBA_H
 
+// Game Boy Advance's screen dimensions
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 160
 
 // Video RAM indexed as a 2d array of shorts (individual pixels in mode 3)
 #define VRAM ((volatile unsigned short (*)[SCREEN_WIDTH])0x06000000)
-
 // Video RAM indexed as unsigned ints. Useful for being able to overwrite 2 pixels at once
 #define VRAM_INT ((volatile unsigned int (*)[SCREEN_WIDTH/2])0x06000000)
 
@@ -15,19 +15,12 @@
 
 // Holds display control values
 #define REG_DISPCNT *((volatile unsigned short*)0x04000000)
+// Bitmap mode with direct colors and no backbuffer, the only mode needed for this game
+#define DCNT_MODE3 0x0003 
+// We're only using background 2 for this game, not the others nor the sprites
+#define DCNT_BG2 0x0400
 
-// Bitmap mode with direct colors and no backbuffer
-// The only mode needed for this game
-#define DCNT_MODE3      0x0003 
-
-// layers
-#define DCNT_BG0        0x0100
-#define DCNT_BG1        0x0200
-#define DCNT_BG2        0x0400
-#define DCNT_BG3        0x0800
-#define DCNT_OBJ        0x1000
-
-// Currently held keys (see key bit locations below)
+// REG_KEYINPUT gives the currently held keys (see key bit locations below)
 // Counterintutively, for the GBA hardware held keys have their bit set to 0, unheld are set to 1
 #define REG_KEYINPUT *((volatile unsigned short*)0x04000130)
 
@@ -45,22 +38,20 @@
 
 // 0 if key is not held, nonzero if key is held
 // More intuitive than how it is actually represented in the hardware
-#define KEY_HELD(key) (~(REG_KEYINPUT) & key)
+#define KEY_HELD(key) (~(REG_KEYINPUT) & (key))
 
 // Wraps value around mod back to zero or vice versa
 // Assumes abs(val) < 2*mod
-#define WRAP(value, mod) (value > mod ? value - mod : (value < 0 ? value + mod : value))
+#define WRAP(value, mod) (value >= mod ? value - mod : (value < 0 ? value + mod : value))
 
-
-// GBA uses 15 bit BGR colors
+// GBA uses 15 bit BGR colors (not RGB!)
 typedef unsigned short color;
 // Creates a GBA compatible color using RGB values in the range 0-31
-#define MAKE_COLOR(r, g, b) ( r | (g << 5) | (b << 10))
+#define MAKE_COLOR(r, g, b) ( (r) | ((g) << 5) | ((b) << 10))
 
-// Waits until the scanline reaches vblank where it's safe to draw without tearing
+// Waits until the scanline reaches next vblank, where it's safe to draw without tearing
 inline void vblank() {
     while(REG_VCOUNT >= SCREEN_HEIGHT);
     while(REG_VCOUNT < SCREEN_HEIGHT);
 }
-
 #endif

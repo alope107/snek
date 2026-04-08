@@ -2,11 +2,13 @@
 
 #define MAX_SNEK_LEN 1000
 
-const color SNEK_COLOR = MAKE_COLOR(31, 0, 0);
-const color FILL_COLOR = MAKE_COLOR(0, 0, 31);
+const color SNEK_COLOR = MAKE_COLOR(31, 0, 0); // red
+const color FILL_COLOR = MAKE_COLOR(0, 0, 31); // blue
 
 // A location allows for packing 16 bit row and column values into a single word
+// The row is held in the higher bits, the column in the lower bits
 typedef unsigned int location;
+
 inline location make_loc(int row, int col) { return (row << 8) | col; }
 inline unsigned int get_col(location loc) {return loc & 0xff;}
 inline unsigned int get_row(location loc) {return (loc & 0xff00) >> 8;}
@@ -31,6 +33,7 @@ const int directions[4][2] = {
 void fill_screen(color fill_color) {
     // In this function we treat VRAM as a 2D array of ints, despite each pixel actually being a short
     // This allows us to fill the screen in half as many cycles
+    // If we really wanted to optimize this further, we could do it using DMA instead
 
     // Repeat the color twice in an unsigned int so both pixels will be set to the same color
     unsigned int repeated_fill = fill_color | fill_color << 16;
@@ -48,6 +51,7 @@ int main() {
 
     fill_screen(FILL_COLOR);
 
+    // current snek length
     unsigned int snek_len = 10;
 
     int row=50, col=50;
@@ -64,6 +68,7 @@ int main() {
         // wait for next vblank, enforces one step per frame (approx 60fps)
         vblank();
 
+        // Reset the background when start button is held
         if(KEY_HELD(KEY_START)) {
             fill_screen(FILL_COLOR);
         }
@@ -86,8 +91,7 @@ int main() {
         // Shrink the snek if B held
         if(KEY_HELD(KEY_B) && snek_len > 2) {
             snek_len--;
-        } 
-        else { // Only move forward if snek is not shrinking
+        } else { // Only move forward if snek is not shrinking
             // snek wraps around screen horizontally and vertically
             row = WRAP(row+directions[dir][0], SCREEN_HEIGHT);
             col = WRAP(col+directions[dir][1], SCREEN_WIDTH);
@@ -101,7 +105,7 @@ int main() {
         // if head and tail are on opposite sides of the buffer, wrap to normalize
         int wrapped_tail = hist_tail < hist_head ? hist_tail : hist_tail - MAX_SNEK_LEN;
 
-        // Do not start earasing tail until the snek has reached its full length
+        // Do not start erasing tail until the snek has reached its full length
         if(hist_head - wrapped_tail == snek_len) {
             VRAM[get_row(history[hist_tail])][get_col(history[hist_tail])] = 0;
             hist_tail++;
@@ -111,5 +115,4 @@ int main() {
         if (hist_head == MAX_SNEK_LEN) hist_head = 0;
         if (hist_tail == MAX_SNEK_LEN) hist_tail = 0;
     };
-    return 0;
 }
